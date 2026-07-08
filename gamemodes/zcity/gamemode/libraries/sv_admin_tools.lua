@@ -37,7 +37,7 @@ COMMANDS.respawn = {
 		for i, ply2 in pairs(player.GetListByName(plya)) do
 			if ply2:Alive() then continue end
 			ply2:Spawn()
-            ApplyAppearance( ply2 )
+            ApplyAppearance( ply2,nil,nil,nil,SWARM_CV_Thumper_ForgetTime )
 			local hands = ply2:Give("weapon_hands_sh")
 			ply2:SelectWeapon(hands)
 
