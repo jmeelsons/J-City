@@ -35,6 +35,7 @@ COMMANDS.respawn = {
 		if not ply:IsAdmin() then return end
 		local plya = #args > 0 and args[1] or ply:Name()
 		for i, ply2 in pairs(player.GetListByName(plya)) do
+			if ply2:Alive() then continue end
 			ply2:Spawn()
             ApplyAppearance( ply2 )
 			local hands = ply2:Give("weapon_hands_sh")
