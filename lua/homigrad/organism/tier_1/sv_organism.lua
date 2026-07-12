@@ -76,6 +76,8 @@ hook.Add("Org Clear", "Main", function(org)
 	org.noradrenaline = 0
 
 	org.blindness = nil
+        
+    org.godmode = false         
 
 	if IsValid(org.owner) then
 		if org.owner:IsPlayer() and org.owner:Alive() then
@@ -176,6 +178,8 @@ local function send_organism(org, ply)
 	sendtable.noradrenalineActive = org.noradrenalineActive
 
 	sendtable.superfighter = org.superfighter
+    
+    sendtable.godmode = org.godmode    
 
 	net.Start("organism_send", hg_unreliable_nets:GetBool())
 	net.WriteTable(not hg_developer:GetBool() and sendtable or org)
@@ -227,6 +231,8 @@ local function send_bareinfo(org)
 	sendtable.berserkActive2 = org.berserkActive2
 	sendtable.CantCheckPulse = org.CantCheckPulse
 	sendtable.noradrenalineActive = org.noradrenalineActive
+    
+    sendtable.godmode = org.godmode    
 
 	local rf = RecipientFilter()
 	--rf:AddAllPlayers()
@@ -850,4 +856,109 @@ hook.Add("OnEntityWaterLevelChanged", "ClearBlood", function(ent, old, new)
 		if ent:IsOnFire() then ent:Extinguish() end
 		ent:RemoveAllDecals()
 	end
+end)
+
+concommand.Add("hg_god", function(ply, cmd, args)
+    if not ply:IsAdmin() then
+        ply:ChatPrint("You need admin privileges!")
+        return
+    end
+    
+    if not ply.organism then
+        ply:ChatPrint("Error: No organism found!")
+        return
+    end
+    
+    ply.organism.godmode = not (ply.organism.godmode or false)
+    ply:ChatPrint("God mode " .. (ply.organism.godmode and "ENABLED" or "DISABLED") .. " for you!")
+end)
+
+concommand.Add("hg_god_give", function(ply, cmd, args)
+    if not ply:IsAdmin() then
+        ply:ChatPrint("You need admin privileges!")
+        return
+    end
+    
+    if not args[1] then
+        ply:ChatPrint("Usage: hg_god_give <nick>")
+        return
+    end
+    
+    local target = nil
+    local searchName = string.lower(args[1])
+    
+    for _, v in ipairs(player.GetAll()) do
+        if string.find(string.lower(v:Name()), searchName) then
+            target = v
+            break
+        end
+    end
+    
+    if not IsValid(target) then
+        ply:ChatPrint("Player not found!")
+        return
+    end
+    
+    if not target.organism then
+        ply:ChatPrint("Target has no organism!")
+        return
+    end
+    
+    target.organism.godmode = true
+    ply:ChatPrint("God mode ENABLED for " .. target:Name())
+    target:ChatPrint("God mode enabled by " .. ply:Name())
+end)
+
+concommand.Add("hg_god_remove", function(ply, cmd, args)
+    if not ply:IsAdmin() then
+        ply:ChatPrint("You need admin privileges!")
+        return
+    end
+    
+    if not args[1] then
+        ply:ChatPrint("Usage: hg_god_remove <nick>")
+        return
+    end
+    
+    local target = nil
+    local searchName = string.lower(args[1])
+    
+    for _, v in ipairs(player.GetAll()) do
+        if string.find(string.lower(v:Name()), searchName) then
+            target = v
+            break
+        end
+    end
+    
+    if not IsValid(target) then
+        ply:ChatPrint("Player not found!")
+        return
+    end
+    
+    if not target.organism then
+        ply:ChatPrint("Target has no organism!")
+        return
+    end
+    
+    target.organism.godmode = false
+    ply:ChatPrint("God mode DISABLED for " .. target:Name())
+    target:ChatPrint("God mode disabled by " .. ply:Name())
+end)
+
+hook.Add("EntityTakeDamage", "GodModeProtection", function(target, dmgInfo)
+    if not target:IsPlayer() then return end
+    if not target.organism then return end
+    if not target.organism.godmode then return end
+    
+    dmgInfo:SetDamage(0)
+    
+    return true
+end)
+
+hook.Add("PlayerShouldTakeDamage", "GodModeProtection2", function(ply, attacker)
+    if not ply:IsPlayer() then return end
+    if not ply.organism then return end
+    if ply.organism.godmode then
+        return false
+    end
 end)
