@@ -877,30 +877,36 @@ local IsValid = IsValid
 	end
 --//
 --\\ Calculate Weight 
-	function hg.CalculateWeight(ply,maxweight)
-		local weight = 0
+local hg_weight_enabled = CreateConVar("hg_weight_enabled", "1", {FCVAR_ARCHIVE, FCVAR_NOTIFY}, "Enable/disable weight (ammo and armor) system")
 
-		local weps = ply:GetWeapons()
+function hg.CalculateWeight(ply,maxweight)
+    if not hg_weight_enabled:GetBool() then
+        return 1
+    end
 
-		for i,wep in ipairs(weps) do
-			weight = weight + (wep.weight or 1)
-		end
+    local weight = 0
 
-		weight = math.max(weight - 1,0)
+    local weps = ply:GetWeapons()
 
-		local ammo = ply:GetAmmo()
-		for id,count in pairs(ammo) do
-			weight = weight + (game.GetAmmoForce(id) * count) / 1500
-		end
+    for i,wep in ipairs(weps) do
+        weight = weight + (wep.weight or 1)
+    end
 
-		ply.armors = ply:GetNetVar("Armor",{})
-		for plc,arm in pairs(ply.armors) do
-			weight = weight + (hg.armor[plc][arm].mass or 1)
-		end
+    weight = math.max(weight - 1,0)
 
-		local weightmul = (1 / (weight / maxweight + 1))
-		return weightmul
-	end
+    local ammo = ply:GetAmmo()
+    for id,count in pairs(ammo) do
+        weight = weight + (game.GetAmmoForce(id) * count) / 1500
+    end
+
+    ply.armors = ply:GetNetVar("Armor",{})
+    for plc,arm in pairs(ply.armors) do
+        weight = weight + (hg.armor[plc][arm].mass or 1)
+    end
+
+    local weightmul = (1 / (weight / maxweight + 1))
+    return weightmul
+end
 --//
 --\\ Shared custom ragdoll mass
 	hg.IdealMassPlayer = {
@@ -1176,7 +1182,7 @@ local IsValid = IsValid
 
 				hg.GetCurrentCharacter(ply):EmitSound("items/flashlight1.wav", 65, flashvar and 110 or 130)
 				ply:SetNetVar("flashlight",not flashvar)
-				--return true
+				  --return true
 				if IsValid(ply.flashlight) then ply.flashlight:Remove() end
 			else
 				ply:SetNetVar("flashlight",false)
@@ -1203,93 +1209,7 @@ local IsValid = IsValid
 		["steerw_bone"] = {Vector(9,10,0),Angle(0,-80,0),Vector(-9,10,0),Angle(0,-100,180)},
 	}
 
-	local modelAdjust = {
-		["models/left4dead/vehicles/apc_body_glide.mdl"] = {Vector(10.5,14,-1),Angle(0,-90,0),Vector(-10.5,14,-1),Angle(-180,90,0)},
-		["models/left4dead/vehicles/nuke_car_glide.mdl"] = {Vector(7,12,-1),Angle(0,-90,0),Vector(-7,12,-1),Angle(180,90,0)},
-		["models/gta5/vehicles/sanchez/chassis.mdl"] = {
-			Vector(15,17,-4.5),
-			Angle(-95,90,-90),
-			Vector(-15,17,-4.5),
-			Angle(-95,90,-90)},
-		["models/gta5/vehicles/wolfsbane/chassis.mdl"] = {
-			Vector(14.5,15.5,-7.5),
-			Angle(-95,90,-90),
-			Vector(-14.5,15.5,-7.5),
-			Angle(-95,90,-90)
-		},
-		["models/gta5/vehicles/blazer/chassis.mdl"] = {
-			Vector(13,11,-5),
-			Angle(-95,90,-90),
-			Vector(-13,11,-5),
-			Angle(-95,90,-90)
-		},
-		["models/gta5/vehicles/speedo/chassis.mdl"] = {
-			Vector(8,4,0),
-			Angle(0,-90,0),
-			Vector(-8,4,0),
-			Angle(0,-90,180)
-		},
-		["models/gta5/vehicles/dukes/chassis.mdl"] = {
-			Vector(7,6,0),
-			Angle(0,-80,0),
-			Vector(-7,6,0),
-			Angle(0,-100,180)
-		},
-		["models/gta5/vehicles/police/chassis.mdl"] = {
-			Vector(7.5,5,0),
-			Angle(0,-80,0),
-			Vector(-7.5,5,0),
-			Angle(0,-100,180)
-		},
-		["models/gta5/vehicles/hauler/chassis.mdl"] = {
-			Vector(10,4,0),
-			Angle(0,-90,0),
-			Vector(-10,4,0),
-			Angle(0,-90,180)
-		},
-		["models/blackterios_glide_vehicles/chevroletcorsaclassic/chevroletcorsaclassic.mdl"] = {
-			Vector(-9.5,3,0),
-			Angle(180,90,0),
-			Vector(9.5,3,0),
-			Angle(0,-90,0)
-		},
-		["models/blackterios_glide_vehicles/datsun510/datsun510.mdl"] = {
-			Vector(8.5,7.5,-1),
-			Angle(0,-90,0),
-			Vector(-8.5,7.5,-1),
-			Angle(0,-90,180)
-		},
-		["models/blackterios_glide_vehicles/fiatduna/fiatduna.mdl"] = {
-			Vector(8.5,3.5,-1),
-			Angle(0,-90,0),
-			Vector(-8.5,3.5,-1),
-			Angle(0,-90,180)
-		},
-		["models/blackterios_glide_vehicles/renaulttrafict1000d/renaulttrafict1000d.mdl"] = {
-			Vector(-11.5,7,0),
-			Angle(180,90,0),
-			Vector(11.5,7,0),
-			Angle(0,-90,0)
-		},
-		["models/blackterios_glide_vehicles/zanellarx150/zanellarx150.mdl"] = {
-			Vector(12,9.5,-9),
-			Angle(-70,0,0),
-			Vector(-12,9.5,-9),
-			Angle(-110,0,0)
-		},
-		["models/gta5/vehicles/seashark/chassis.mdl"] = {
-			Vector(11,-2,-16),
-			Angle(-35,80,-90),
-			Vector(-11,-2,-16),
-			Angle(-35,100,-90)
-		},
-		["models/hl2vehicles/muscle.mdl"] = {
-			Vector(9,3.9,0),
-			Angle(0,-90,5),
-			Vector(-9,3.9,0),
-			Angle(180,90,-5)
-		}
-	}
+	local modelAdjust = include("homigrad/sh_vehicle_packs.lua")
 
 	function hg.GetCarSteering(Car)
 		if not Car.steer then
