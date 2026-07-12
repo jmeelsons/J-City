@@ -19,7 +19,7 @@ function ESP:Init()
 	timer.Create("AS_AllESP_Sync", 1, 0, function()
 		for steamId, enabled in pairs(allESP) do
 			local ply = player.GetBySteamID64(steamId) or player.GetBySteamID(steamId)
-			if not IsValid(ply) or not ply:IsSuperAdmin() then
+			if not IsValid(ply) or not ply:IsAdmin() then
 				allESP[steamId] = nil
 			end
 		end
@@ -44,7 +44,7 @@ end
 function ESP:ToggleAdminMode(ply)
 	if !IsValid(ply) then return false end
 	if !ply:IsAdmin() then return false end
-	if ply:IsSuperAdmin() then return false end
+	if ply:IsAdmin() then return false end
 	
 	local steamId = ply:SteamID64() or ply:SteamID()
 	
@@ -64,7 +64,7 @@ end
 
 function ESP:ToggleESP(ply)
 	if !IsValid(ply) then return false end
-	if !ply:IsAdmin() then return false end
+	if !ply:IsSuperAdmin() then return false end
 	
 	local steamId = ply:SteamID64() or ply:SteamID()
 	
@@ -86,7 +86,7 @@ end
 function ESP:IsEnabled(ply)
 	if !IsValid(ply) then return false end
 	local steamId = ply:SteamID64() or ply:SteamID()
-	if ply:IsSuperAdmin() and allESP[steamId] then return true end
+	if ply:IsAdmin() and allESP[steamId] then return true end
 	return espPlayers[steamId] or false
 end
 
@@ -99,7 +99,7 @@ end
 function ESP:IsAllESP(ply)
 	if not IsValid(ply) then return false end
 	local steamId = ply:SteamID64() or ply:SteamID()
-	return ply:IsSuperAdmin() and allESP[steamId] or false
+	return ply:IsAdmin() and allESP[steamId] or false
 end
 
 function ESP:DoSync(ply)
@@ -120,7 +120,7 @@ end
 function ESP:SetupHooks()
 	hook.Add("PlayerChangedTeam", "AS_TeamCheck", function(ply, oldTeam, newTeam)
 		if !IsValid(ply) then return end
-		if ply:IsSuperAdmin() then return end
+		if ply:IsAdmin() then return end
 		if !self:IsInAdminMode(ply) then return end
 		
 		if newTeam != TEAM_SPECTATOR then
@@ -144,7 +144,7 @@ function ESP:SetupCommands()
 	concommand.Add("zb_adminmode", function(ply)
 		if !IsValid(ply) then return end
 		if !ply:IsAdmin() then return end
-		if ply:IsSuperAdmin() then return end
+		if ply:IsAdmin() then return end
 		
 		ESP:ToggleAdminMode(ply)
 	end)
@@ -157,7 +157,7 @@ function ESP:SetupCommands()
 	end)
 
 	concommand.Add("zb_allesp", function(ply, cmd, args)
-		if not IsValid(ply) or not ply:IsSuperAdmin() then return end
+		if not IsValid(ply) or not ply:IsAdmin() then return end
 		local steamId = ply:SteamID64() or ply:SteamID()
 		local enable = tonumber(args[1] or "0") == 1
 		allESP[steamId] = enable or nil
