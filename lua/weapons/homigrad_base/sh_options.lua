@@ -300,3 +300,56 @@ if CLIENT then
         }
     end)
 end
+
+if CLIENT then
+    hook.Add("radialOptions", "ammo_display_in_weapon_menu", function()
+        
+        if not input.IsKeyDown(KEY_LALT) and not input.IsKeyDown(KEY_RALT) then
+            return
+        end
+
+        if hg_ammo_hud_enabled and hg_ammo_hud_enabled:GetBool() then
+            return 
+        end
+        
+        local wep = lply:GetActiveWeapon()
+        if not IsValid(wep) then return end
+        if not ishgweapon(wep) then return end
+
+        local clip = wep:Clip1() or 0
+        local maxClip = wep:GetMaxClip1() or 0
+        local reserve = lply:GetAmmoCount(wep:GetPrimaryAmmoType()) or 0
+
+        local ammoText = ""
+        local weaponName = wep:GetPrintName() or "Unknown"
+
+        if #weaponName > 15 then
+            weaponName = string.sub(weaponName, 1, 12) .. "..."
+        end
+        
+        if maxClip <= 0 then
+            ammoText = string.format("%s\n[ %d / ∞ ]", weaponName, clip)
+        else
+            ammoText = string.format("%s\n[ %d / %d ]", weaponName, clip, maxClip)
+
+            if reserve > 0 then
+                ammoText = string.format("%s\n[ %d / %d ]\n+%d", weaponName, clip, maxClip, reserve)
+            end
+        end
+
+        if clip == 0 and reserve == 0 then
+            ammoText = string.format("%s\n[ EMPTY ]", weaponName)
+        end
+
+        if maxClip == -1 then
+            ammoText = string.format("%s\n[ N/A ]", weaponName)
+        end
+
+        hg.radialOptions[#hg.radialOptions + 1] = {
+            [1] = function()
+                return 0
+            end,
+            [2] = ammoText
+        }
+    end)
+end
