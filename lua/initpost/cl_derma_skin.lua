@@ -8,11 +8,12 @@ hg.VGUI.MainSkin = "ZCity"
 function hg.GetMainSkin()
 	return hg.VGUI.MainSkin
 end
---//
 
 hook.Add("ForceDermaSkin", "ZCity", function()
 	return "ZCity" --; This will paint all Derma objects to new skin
 end)
+
+--//
 
 --; Adapted from Helix
 
@@ -32,72 +33,92 @@ end
 
 surface.CreateFont("ZCity_VerySuperTiny", {
 	font = font(),
+	extended = true,
 	size = ScreenScale(5),
+	weight = 200
+})
+
+surface.CreateFont("ZCity_SuperTinyOutlined", {
+	font = font(),
+	extended = true,
+	size = ScreenScale(6),
+    outlined = true,    
 	weight = 200
 })
 
 surface.CreateFont("ZCity_SuperTiny", {
 	font = font(),
+	extended = true,
 	size = ScreenScale(6),
 	weight = 200
 })
 
 surface.CreateFont("ZCity_Fixed_SuperTiny", {
 	font = font(),
+	extended = true,
 	size = 18,
 	weight = 200
 })
 
 surface.CreateFont("ZCity_Tiny", {
 	font = font(),
+	extended = true,
 	size = ScreenScale(8),
 	weight = 200
 })
 
 surface.CreateFont("ZCity_Fixed_Tiny", {
 	font = font(),
+	extended = true,
 	size = 25,
 	weight = 200
 })
 
 surface.CreateFont("ZCity_Small", {
 	font = font(),
+	extended = true,
 	size = ScreenScale(15),
 	weight = 200
 })
 
 surface.CreateFont("ZCity_Medium", {
 	font = font(),
+	extended = true,
 	size = ScreenScale(25),
 	weight = 200
 })
 
 surface.CreateFont("ZCity_Fixed_Medium", {
 	font = font(),
+	extended = true,
 	size = 55,
 	weight = 200
 })
 
 surface.CreateFont("ZCity_Big", {
 	font = font(),
+	extended = true,
 	size = ScreenScale(35),
 	weight = 200
 })
 
 surface.CreateFont("ZCity_Fixed_Big", {
 	font = font(),
+	extended = true,
 	size = 300,
 	weight = 200
 })
 
 surface.CreateFont("ZCity_Fixed_Medium_Light", {
 	font = font(),
+	extended = true,
 	size = 25,
 	weight = 200
 })
 
 surface.CreateFont("ZCity_Fixed_Medium_Light_Blur", {
 	font = font(),
+	extended = true,
 	size = 25,
 	weight = 200,
 	blursize = 4
@@ -105,9 +126,63 @@ surface.CreateFont("ZCity_Fixed_Medium_Light_Blur", {
 
 surface.CreateFont("ZCity_Fixed_Icons_Small", {
 	font = "fontello",
+	extended = true,
 	size = 22,
 	weight = 500
 })
+
+// esc
+
+surface.CreateFont("ZC_MM_Title", {
+    font = font(),
+    size = ScreenScale(40),
+    weight = 800,
+    antialias = true
+})
+
+surface.CreateFont("ZC_MM_Buttons", {
+    font = font(),
+    size = ScreenScale(12),
+    weight = 500,
+    antialias = true
+})
+
+// ammo
+
+surface.CreateFont("AmmoFont",{
+	font = font(),
+	size = ScreenScale(16),
+	extended = true,
+	weight = 500,
+	antialias = true
+})
+
+surface.CreateFont("DescFont",{
+	font = font(),
+	size = ScreenScale(8),
+	extended = true,
+	shadow = true,
+	weight = 500,
+	antialias = true
+})
+
+--//
+
+local function a(b, c, d)
+    surface.CreateFont(b, {
+        ["font"] = font(),
+        ["size"] = c,
+        ["weight"] = d,
+        ["extended"] = true
+    })
+end
+
+timer.Simple(0, function()
+    a("DermaDefault", system.IsLinux() and 11 or 15, 400)
+    a("DermaDefaultBold", system.IsLinux() and 11 or 15, 600)
+    a("DermaLarge", 38, 500)
+end)
+
 --//
 
 local gradient = surface.GetTextureID("vgui/gradient-d")
@@ -163,24 +238,53 @@ function SKIN.tex.Menu_Strip(x, y, width, height, color)
 end
 
 function SKIN:PaintFrame(panel)
+	if not IsValid(panel) then return end
+	
 	if (!panel.bNoBackgroundBlur) then
 		hg.DrawBlur(panel, 10)
 	end
 
+	local wide = panel:GetWide()
+	local tall = panel:GetTall()
+	
+	if wide <= 0 or tall <= 0 then return end
+
 	surface.SetDrawColor(30, 30, 30, 150)
-	surface.DrawRect(0, 0, panel:GetWide(), panel:GetTall())
+	surface.DrawRect(0, 0, wide, tall)
 
-	if (panel:GetTitle() != "" or panel.btnClose:IsVisible()) then
-		surface.SetDrawColor(hg.VGUI.MainColor)
-		surface.DrawRect(0, 0, panel:GetWide(), 24)
+	local hasTitle = false
+	local btnCloseVisible = false
+	
+	pcall(function()
+		if IsValid(panel) then
+			local title = panel:GetTitle()
+			if title and title != "" then
+				hasTitle = true
+			end
+		end
+	end)
+	
+	if IsValid(panel) and panel.btnClose and IsValid(panel.btnClose) then
+		pcall(function()
+			btnCloseVisible = panel.btnClose:IsVisible()
+		end)
+	end
 
-		if (panel.bHighlighted) then
-			self:DrawImportantBackground(0, 0, panel:GetWide(), 24, ColorAlpha(color_white, 22))
+	if (hasTitle or btnCloseVisible) then
+		if IsValid(panel) then
+			surface.SetDrawColor(hg.VGUI.MainColor)
+			surface.DrawRect(0, 0, wide, 24)
+
+			if (panel.bHighlighted) then
+				self:DrawImportantBackground(0, 0, wide, 24, ColorAlpha(color_white, 22))
+			end
 		end
 	end
 
-	surface.SetDrawColor(hg.VGUI.MainColor)
-	surface.DrawOutlinedRect(0, 0, panel:GetWide(), panel:GetTall())
+	if IsValid(panel) then
+		surface.SetDrawColor(hg.VGUI.MainColor)
+		surface.DrawOutlinedRect(0, 0, wide, tall)
+	end
 end
 
 function SKIN:PaintBaseFrame(panel, width, height)
