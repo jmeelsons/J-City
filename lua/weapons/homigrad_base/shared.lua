@@ -816,30 +816,10 @@ local function LerpColor(lerp, source, set)
 	return Lerp(lerp, source.r, set.r), Lerp(lerp, source.g, set.g), Lerp(lerp, source.b, set.b)
 end
 
-local col = Color(0, 0, 0)
-local col2 = Color(0, 0, 0)
-local dynamicmags
-local instructions 
 if CLIENT then
-	surface.CreateFont("AmmoFont",{
-		font = "Bahnschrift",
-		size = ScreenScale(16),
-		extended = true,
-		weight = 500,
-		antialias = true
-	})
-
-	surface.CreateFont("DescFont",{
-		font = "Bahnschrift",
-		size = ScreenScale(8),
-		extended = true,
-		shadow = true,
-		weight = 500,
-		antialias = true
-	})
-
 	dynamicmags = CreateClientConVar("hg_dynamic_mags", "0", true, false, "Enables dynamic ammo show when shooting",0,1)
 	instructions = CreateClientConVar("hg_instructions","1", true, false, "Enables gun instructions",0,1)
+	hg_hud_enabled = CreateClientConVar("hg_ammo_hud_enabled", "0", true, false, "Disable/Enable AMMO HUD (radial menu ammo inspector)",0,1)
 end
 
 function SWEP:DrawHUDAdd()
@@ -854,68 +834,8 @@ local function DrawBlurRect(x, y, w, h, dens, alpha)
    	surface.SetDrawColor(0,0,0)
 end
 
-	--local clipsize = (self:GetMaxClip1() + (self.OpenBolt and 0 or 1))
-	--local owner = self:GetOwner()
-	--local attpos = self:GetMuzzleAtt(nil, true, true).Pos
-	--local posX,posY = dynamicmags:GetBool() and attpos:ToScreen().x + 50 or ScrW() - ScrW() / 4, dynamicmags:GetBool() and attpos:ToScreen().y + 90 or ScrH() - ScrH() / 6
-	--local sizeX,sizeY =  (clipsize == 1 and ScrH() / 15 or ScrW() / 40) * scale, (clipsize == 1 and ScrH() / 80 or ScrH() / 10) * scale
---
---
-	--lerpAmmoCheck = Lerp(owner:KeyDown(IN_RELOAD) and 0.5 or 0.02, lerpAmmoCheck, self:KeyDown(IN_RELOAD) and 1 or (dynamicmags:GetBool() and 0 or 0.0))
-	--colBlack.a = 125 * lerpAmmoCheck
-	--colWhite.a = 255 * lerpAmmoCheck
-	--local ammoLeft = math.ceil(self:Clip1() / clipsize * sizeY)
-	--local ammo = owner:GetAmmoCount(self:GetPrimaryAmmoType())
-	--local magCount = math.ceil(ammo / clipsize)
---
-	--col:SetUnpacked(LerpColor(ammoLeft / sizeY, yellow, color_white))
-	--col.a = 255 * lerpAmmoCheck
-	--if col.a > 1 then
-	--	DrawBlurRect(posX-sizeX*(clipsize ~= 1 and .2 or .3),posY-sizeY*(clipsize ~= 1 and .1 or .7),(sizeX+sizeX*(clipsize ~= 1 and .12 or .2)) * (math.max(math.min(magCount+1,(clipsize ~= 1 and 5 or 4)),1.3)), sizeY + (clipsize ~= 1 and 20 or 60),7,col.a*5)
-	--end
-	--
-	--local color = col
-	--surface.SetDrawColor(color)
-	--surface.DrawRect(posX,posY - ammoLeft + sizeY, sizeX, ammoLeft, 1)
-	--surface.DrawOutlinedRect(posX - 5, posY - 5, sizeX + 10, sizeY + 10, 1)
---
-	--local posX,posY = posX + (clipsize == 1 and ScrW() / 40 or ScrW() / 50), posY + (clipsize == 1 and ScrH()/70 or ScrH() / 20)
-	--local sizeX,sizeY = sizeX / 2,sizeY / 2
---
-	--for i = 1,magCount do
-	--	if i > 3 then continue end
-	--	local ammoasd = math.min(clipsize,ammo)
-	--	ammo = ammo - ammoasd
-	--	
-	--	local ammoLeft = math.ceil(ammoasd / clipsize * sizeY)
-	--	
-	--	col2:SetUnpacked(LerpColor(ammoLeft / sizeY, yellow, color_white))
-	--	col2.a = 255 * lerpAmmoCheck
-	--	surface.SetDrawColor(col2)
-	--	surface.DrawRect(posX + (sizeX + 15) * i,posY - ammoLeft + sizeY, sizeX, ammoLeft, 1)
-	--	surface.DrawOutlinedRect(posX - 5 + (sizeX + 15) * i,posY - 5, sizeX + 10, sizeY + 10, 1)
-	--end
---
-	--if magCount > 3 then
-	--	draw.SimpleText("+"..magCount-3,"AmmoFont",posX + (sizeX + 15) * 4 + 1, posY + sizeX/2 + 1,Color(0,0,0,255*lerpAmmoCheck),TEXT_ALIGN_LEFT,TEXT_ALIGN_CENTER)
-	--	draw.SimpleText("+"..magCount-3,"AmmoFont",posX + (sizeX + 15) * 4 , posY + sizeX/2,Color(255,255,255,255*lerpAmmoCheck),TEXT_ALIGN_LEFT,TEXT_ALIGN_CENTER)
-	--end
-	
-
-	--self.hudinspect = self.hudinspect or 0
-	--if instructions:GetBool() and self.hudinspect - (CurTime()-6) > 0 then
-	--	self.InfoAlpha = Lerp(FrameTime() * 10,self.InfoAlpha or 0,math.min(self.hudinspect - (CurTime() - 5),1)*255)
-	--	local txt = self.Instructions
-	--	if not self.InfoMarkup1 then
-	--		self.InfoMarkup1 = markup.Parse( "<font=DescFont>"..txt.."</font>", 450 )
-	--	end
-	--	DrawBlurRect(posX - 5 - self.InfoMarkup1:GetWidth() - ScrW()*0.05, posY - self.InfoMarkup1:GetHeight()/2 - 5, self.InfoMarkup1:GetWidth()+10, self.InfoMarkup1:GetHeight()+10, 8, self.InfoAlpha)
-	--	self.InfoMarkup1:Draw(posX- ScrW()*0.05,posY,TEXT_ALIGN_RIGHT,TEXT_ALIGN_CENTER,self.InfoAlpha)
-	--end
-
 local scale = 1
 local developer = GetConVar("developer")
-
 
 local function DrawBullet(matIcon, x, y, size, cColor)
 	render.PushFilterMin(TEXFILTER.ANISOTROPIC)
@@ -942,6 +862,9 @@ if CLIENT then
 	local ammoLongCheck = 0
 	SWEP.DrawAmmoMetods = {
 		["Default"] = function(self,texture)
+			-- Проверяем включен ли HUD
+			if not hg_hud_enabled:GetBool() then return end
+			
 			local clipsize = self:GetMaxClip1() + (self.OpenBolt and 0 or 1)
 			local clip = self:Clip1()
 			local owner = self:GetOwner()
@@ -982,32 +905,20 @@ if CLIENT then
 
 			lerpAmmoCheck = LerpFT((ammoCheck > CurTime()) and 0.2 or 0.1, lerpAmmoCheck, ammoCheck > CurTime() and 1 or 0)
 			local Yellow = (( clipsize/clip )-1)/(clipsize/5)
-			--print(Yellow)
 			color_bg.r = 55*Yellow
-			--draw.RoundedBox(0,scrW*0.75-(scrH*0.12/2),scrH*0.72,scrH*0.12,scrH*0.18,ColorAlpha(color_black,50))
 			color_bg.a = (250*lastShoot) * lerpAmmoCheck
 			WhiteColor.a = (150*lastShoot) * lerpAmmoCheck
 			local PosLerp = Lerp(math.ease.OutExpo(lerpAmmoCheck),150,0)
-			--print(PosLerp)
+			
 			if clip > 0 then
 				DrawBullet(texture,posX - (scrH*0.16)+(scrH*0.08)*(1+lastShoot) + 2 + PosLerp,scrH*(HudHPos) + 2,scrH*0.08, color_bg)
 				DrawBullet(texture,posX - (scrH*0.16)+(scrH*0.08)*(1+lastShoot) + PosLerp,scrH*(HudHPos),scrH*0.08, WhiteColor)
-				--if lastShoot < 0.2 then StopShowBullet = true end
 			end
-			--if StopShowBullet then
-			--	lastShootFor = 0 
-			--	if lastShoot > 0.6 then
-			--		StopShowBullet = false
-			--	end
-			--else
-			--end
-			--print(clipsize)
-			--print(lastShoot)
+			
 			for i = 2, clip do
 				if i > 6 and lastShootFor > 0.5 or i > 7 then continue end
 				i = i - 1
 				local PosAdjust = math.max(PosLerp - i*15,0)
-				--print(PosAdjust)
 				if i < 2 then
 					DrawBullet(texture,posX + 2 + PosAdjust,scrH*((HudHPos) + i*(0.026*lastShoot))+2,scrH*0.08, color_bg)
 					DrawBullet(texture,posX + PosAdjust,scrH*((HudHPos) + i*(0.026*lastShoot)),scrH*0.08, WhiteColor)
@@ -1031,13 +942,15 @@ if CLIENT then
 				coloruse.a = 210*lerpAmmoCheck
 				draw.SimpleText("+"..magCount,"AmmoFont",posX2, scrH*HudHPos,coloruse,TEXT_ALIGN_LEFT,TEXT_ALIGN_CENTER)
 			end
-			--draw.SimpleText("lastShoot: "..lastShoot,"Default",0,0)
 		end
 	}
 
 	SWEP.AmmoDrawMetod = "Default"
 
 	function SWEP:DrawHUD()
+		-- Проверяем включен ли HUD
+		if not hg_hud_enabled:GetBool() then return end
+		
 		if not IsValid(self:GetOwner()) then return end
 		local ammotype = (hg.ammotypeshuy[self.Primary.Ammo] and hg.ammotypeshuy[self.Primary.Ammo].BulletSettings and hg.ammotypeshuy[self.Primary.Ammo].BulletSettings.Icon) or matPistolAmmo
 		self.DrawAmmoMetods[self.AmmoDrawMetod](self,ammotype)
