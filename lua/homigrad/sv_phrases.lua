@@ -212,6 +212,61 @@ local swat_phrases = {
 	}
 }
 
+local police_phrases = {
+	normal = {
+		"police_voice/lspd/idle_1.mp3",
+		"police_voice/lspd/idle_2.mp3",
+--		"police_voice/lspd/idle_3.mp3", -- LSPD FREE'S 🗣️🗣️🗣️🗣️🗣️
+		"police_voice/lspd/idle_4.mp3",
+		"police_voice/lspd/idle_5.mp3",
+		"police_voice/lspd/idle_6.mp3",
+		"police_voice/lspd/idle_7.mp3",
+		"police_voice/lspd/idle_8.mp3",
+		"police_voice/lspd/idle_9.mp3",
+		"police_voice/lspd/idle_10.mp3"
+	},
+	kill = {
+		"police_voice/lspd/kill_1.mp3",
+		"police_voice/lspd/kill_2.mp3",
+		"police_voice/lspd/kill_3.mp3",
+		"police_voice/lspd/kill_3.mp3",
+		"police_voice/lspd/kill_4.mp3",
+		"police_voice/lspd/kill_5.mp3",
+		"police_voice/lspd/kill_6.mp3",
+		"police_voice/lspd/kill_7.mp3",
+		"police_voice/lspd/kill_8.mp3",
+		"police_voice/lspd/kill_9.mp3"
+	},
+	teammate_death = {
+		"police_voice/lspd/teamdown_1.mp3",
+		"police_voice/lspd/teamdown_2.mp3",
+		"police_voice/lspd/teamdown_3.mp3",
+		"police_voice/lspd/teamdown_3.mp3",
+		"police_voice/lspd/teamdown_4.mp3",
+		"police_voice/lspd/teamdown_5.mp3",
+		"police_voice/lspd/teamdown_6.mp3"
+	},
+	grenade_throw = {
+		"police_voice/lspd/grenade_1.mp3",
+		"police_voice/lspd/grenade_2.mp3",
+		"police_voice/lspd/grenade_3.mp3",
+		"police_voice/lspd/grenade_3.mp3",
+		"police_voice/lspd/grenade_4.mp3",
+		"police_voice/lspd/grenade_5.mp3",
+		"police_voice/lspd/grenade_6.mp3",
+		"police_voice/lspd/grenade_7.mp3"
+	},
+	reload = {
+		"police_voice/lspd/reload_1.mp3",
+		"police_voice/lspd/reload_2.mp3",
+		"police_voice/lspd/reload_3.mp3",
+		"police_voice/lspd/reload_3.mp3",
+		"police_voice/lspd/reload_4.mp3",
+		"police_voice/lspd/reload_5.mp3"
+	}
+}
+
+
 local laugh = {
 	"zbattle/laugh/laugh1.ogg",
 	"zbattle/laugh/laugh2.ogg",
@@ -244,6 +299,8 @@ local function GetPlayerClassPhrases(ply, phraseType)
 		return commanderforces_phrases[phraseType]
 	elseif playerClass == "swat" and swat_phrases[phraseType] then
 		return swat_phrases[phraseType]
+	elseif playerClass == "police" and police_phrases[phraseType] then
+		return police_phrases[phraseType]	
 	end
 
 	return nil
@@ -295,7 +352,7 @@ net.Receive("hg_phrase", function(len, ply)
 	local playerClass = ply.PlayerClassName
 
 	if playerClass == "terrorist" or playerClass == "nationalguard" or 
-	   playerClass == "commanderforces" or playerClass == "swat" then
+	   playerClass == "commanderforces" or playerClass == "swat" or playerClass == "police" then
 		PlayClassPhrase(ply, "normal")
 		return
 	end
@@ -503,7 +560,7 @@ hook.Add("HarmDone", "killmazafaka", function(attacker, victim, amt)
 	
 	local playerClass = attacker.PlayerClassName
 	if playerClass == "terrorist" or playerClass == "nationalguard" or 
-	   playerClass == "commanderforces" or playerClass == "swat" then
+	   playerClass == "commanderforces" or playerClass == "swat" or playerClass == "police" then
 		timer.Simple(0.5, function()
 			if IsValid(attacker) and IsValid(victim) and !victim:Alive() then
 				PlayClassPhrase(attacker, "kill")
@@ -517,7 +574,7 @@ hook.Add("HarmDone", "MateDead", function(attacker, victim, amt)
 	
 	local victimClass = victim.PlayerClassName
 	if !(victimClass == "terrorist" or victimClass == "nationalguard" or 
-			victimClass == "commanderforces" or victimClass == "swat") then return end
+			victimClass == "commanderforces" or victimClass == "swat" or victimClass == "police") then return end
 	
 	for _, ply in player.Iterator() do
 		if IsValid(ply) and ply:Alive() and ply ~= victim and ply.PlayerClassName == victimClass then
@@ -549,7 +606,7 @@ hook.Add("HGReloading", "Perezaryad", function(wep)
 	if !IsValid(ply) then return end
 	
 	local playerClass = ply.PlayerClassName
-	if !(playerClass == "terrorist" or playerClass == "nationalguard" or playerClass == "swat") then return end
+	if !(playerClass == "terrorist" or playerClass == "nationalguard" or playerClass == "swat" or playerClass == "police") then return end
 	
 	ply.ClassReloadSND_CD = ply.ClassReloadSND_CD or 0
 	if ply.ClassReloadSND_CD > CurTime() then return end
