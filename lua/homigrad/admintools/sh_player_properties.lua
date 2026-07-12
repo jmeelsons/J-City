@@ -195,7 +195,7 @@ properties.Add( "freeze", {
         ent = hg.RagdollOwner( ent ) or ent
         
 		ent:Freeze(not ent:IsFrozen())
-		print(tostring(ply:Nick() or ply) .. (ent:IsFrozen() and " has frozen " or " has unfrozen ").. tostring(ent:Nick() or ent))
+		print(tostring(ply:Nick() or ply) .. (not ent:IsFrozen() and " has frozen " or " has unfrozen ").. tostring(ent:Nick() or ent))
 	end 
 } )
 
@@ -623,6 +623,224 @@ properties.Add( "door_unlock", {
         ent:Fire("unlock")
     end
 })
+
+// SNB-RU
+
+-- =============================================
+-- GOD MODE PROPERTIES
+-- =============================================
+
+properties.Add( "godmode_enable", {
+	MenuLabel = "Enable God Mode",
+	Order = 20,
+	MenuIcon = "icon16/shield.png",
+	
+	Filter = check,
+	Action = function( self, ent )
+		Derma_Query(
+			"This will enable god mode for the player.",
+			"Enable God Mode?",
+			"Yes",
+			function()
+				self:MsgStart()
+					net.WriteEntity( ent )
+				self:MsgEnd()
+			end,
+			"No"
+		)
+	end,
+	Receive = function( self, length, ply )
+		local ent = net.ReadEntity()
+		
+		if ( !self:Filter( ent, ply ) ) then return end
+		ent = hg.RagdollOwner( ent ) or ent
+		
+		if not ent.organism then
+			ply:ChatPrint("Target has no organism!")
+			return
+		end
+		
+		ent.organism.godmode = true
+		print(tostring(ply:Nick() or ply) .. " has ENABLED god mode for " .. tostring(ent:Nick() or ent))
+		ent:ChatPrint("God mode enabled by " .. ply:Name())
+		ply:ChatPrint("God mode ENABLED for " .. ent:Name())
+	end 
+} )
+
+properties.Add( "godmode_disable", {
+	MenuLabel = "Disable God Mode",
+	Order = 21,
+	MenuIcon = "icon16/shield_delete.png",
+	
+	Filter = check,
+	Action = function( self, ent )
+		Derma_Query(
+			"This will disable god mode for the player.",
+			"Disable God Mode?",
+			"Yes",
+			function()
+				self:MsgStart()
+					net.WriteEntity( ent )
+				self:MsgEnd()
+			end,
+			"No"
+		)
+	end,
+	Receive = function( self, length, ply )
+		local ent = net.ReadEntity()
+		
+		if ( !self:Filter( ent, ply ) ) then return end
+		ent = hg.RagdollOwner( ent ) or ent
+		
+		if not ent.organism then
+			ply:ChatPrint("Target has no organism!")
+			return
+		end
+		
+		ent.organism.godmode = false
+		print(tostring(ply:Nick() or ply) .. " has DISABLED god mode for " .. tostring(ent:Nick() or ent))
+		ent:ChatPrint("God mode disabled by " .. ply:Name())
+		ply:ChatPrint("God mode DISABLED for " .. ent:Name())
+	end 
+} )
+
+properties.Add( "godmode_toggle", {
+	MenuLabel = "Toggle God Mode",
+	Order = 22,
+	MenuIcon = "icon16/shield_go.png",
+	
+	Filter = check,
+	Action = function( self, ent )
+		self:MsgStart()
+			net.WriteEntity( ent )
+		self:MsgEnd()
+	end,
+	Receive = function( self, length, ply )
+		local ent = net.ReadEntity()
+		
+		if ( !self:Filter( ent, ply ) ) then return end
+		ent = hg.RagdollOwner( ent ) or ent
+		
+		if not ent.organism then
+			ply:ChatPrint("Target has no organism!")
+			return
+		end
+		
+		ent.organism.godmode = not (ent.organism.godmode or false)
+		local status = ent.organism.godmode and "ENABLED" or "DISABLED"
+		print(tostring(ply:Nick() or ply) .. " has TOGGLED god mode " .. status .. " for " .. tostring(ent:Nick() or ent))
+		ent:ChatPrint("God mode " .. status .. " by " .. ply:Name())
+		ply:ChatPrint("God mode " .. status .. " for " .. ent:Name())
+	end 
+} )
+
+-- =============================================
+-- INFINITE STAMINA PROPERTIES
+-- =============================================
+
+properties.Add( "infstamina_enable", {
+	MenuLabel = "Enable Infinite Stamina",
+	Order = 23,
+	MenuIcon = "icon16/lightning_add.png",
+	
+	Filter = check,
+	Action = function( self, ent )
+		Derma_Query(
+			"This will give infinite stamina to the player.",
+			"Enable Infinite Stamina?",
+			"Yes",
+			function()
+				self:MsgStart()
+					net.WriteEntity( ent )
+				self:MsgEnd()
+			end,
+			"No"
+		)
+	end,
+	Receive = function( self, length, ply )
+		local ent = net.ReadEntity()
+		
+		if ( !self:Filter( ent, ply ) ) then return end
+		ent = hg.RagdollOwner( ent ) or ent
+		
+		if not ent.organism or not ent.organism.stamina then
+			ply:ChatPrint("Target has no organism/stamina!")
+			return
+		end
+		
+		ent.InfiniteStamina = true
+		print(tostring(ply:Nick() or ply) .. " has ENABLED infinite stamina for " .. tostring(ent:Nick() or ent))
+		ent:ChatPrint("Infinite stamina enabled by " .. ply:Name())
+		ply:ChatPrint("Infinite stamina ENABLED for " .. ent:Name())
+	end 
+} )
+
+properties.Add( "infstamina_disable", {
+	MenuLabel = "Disable Infinite Stamina",
+	Order = 24,
+	MenuIcon = "icon16/lightning_delete.png",
+	
+	Filter = check,
+	Action = function( self, ent )
+		Derma_Query(
+			"This will remove infinite stamina from the player.",
+			"Disable Infinite Stamina?",
+			"Yes",
+			function()
+				self:MsgStart()
+					net.WriteEntity( ent )
+				self:MsgEnd()
+			end,
+			"No"
+		)
+	end,
+	Receive = function( self, length, ply )
+		local ent = net.ReadEntity()
+		
+		if ( !self:Filter( ent, ply ) ) then return end
+		ent = hg.RagdollOwner( ent ) or ent
+		
+		if not ent.organism or not ent.organism.stamina then
+			ply:ChatPrint("Target has no organism/stamina!")
+			return
+		end
+		
+		ent.InfiniteStamina = false
+		print(tostring(ply:Nick() or ply) .. " has DISABLED infinite stamina for " .. tostring(ent:Nick() or ent))
+		ent:ChatPrint("Infinite stamina disabled by " .. ply:Name())
+		ply:ChatPrint("Infinite stamina DISABLED for " .. ent:Name())
+	end 
+} )
+
+properties.Add( "infstamina_toggle", {
+	MenuLabel = "Toggle Infinite Stamina",
+	Order = 25,
+	MenuIcon = "icon16/lightning_go.png",
+	
+	Filter = check,
+	Action = function( self, ent )
+		self:MsgStart()
+			net.WriteEntity( ent )
+		self:MsgEnd()
+	end,
+	Receive = function( self, length, ply )
+		local ent = net.ReadEntity()
+		
+		if ( !self:Filter( ent, ply ) ) then return end
+		ent = hg.RagdollOwner( ent ) or ent
+		
+		if not ent.organism or not ent.organism.stamina then
+			ply:ChatPrint("Target has no organism/stamina!")
+			return
+		end
+		
+		ent.InfiniteStamina = not (ent.InfiniteStamina or false)
+		local status = ent.InfiniteStamina and "ENABLED" or "DISABLED"
+		print(tostring(ply:Nick() or ply) .. " has TOGGLED infinite stamina " .. status .. " for " .. tostring(ent:Nick() or ent))
+		ent:ChatPrint("Infinite stamina " .. status .. " by " .. ply:Name())
+		ply:ChatPrint("Infinite stamina " .. status .. " for " .. ent:Name())
+	end 
+} )
 
 local defaultinv = {
     Weapons = {},
