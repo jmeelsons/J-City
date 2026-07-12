@@ -135,3 +135,16 @@ hook.Add("FinishMove", "!homigrad-organism", function(ply, move)
 	if vel ~= vecZero then ply.organism.stamina[1] = max(ply.organism.stamina[1] - ply:GetJumpPower() / 10,0) end
 	ply.organism.moveMaxSpeed = move:GetMaxSpeed()
 end)
+
+hook.Add("Org Think", "InfiniteStaminaHook", function(owner, org, timeValue)
+	if not owner:IsPlayer() then return end
+	if not owner.InfiniteStamina then return end
+	if not org.stamina then return end
+	
+	-- Always keep stamina at maximum
+	org.stamina[1] = org.stamina.max
+	
+	-- Zero out any stamina drain
+	org.stamina.sub = 0
+	org.stamina.subadd = 0
+end)
