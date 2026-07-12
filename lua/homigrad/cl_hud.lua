@@ -87,6 +87,7 @@ end
 --atlaschat.coolvetica
 surface.CreateFont("HomigradFont", {
 	font = font(),
+	extended = true,
 	size = ScreenScale(10),
 	weight = 1100,
 	outline = false
@@ -94,6 +95,7 @@ surface.CreateFont("HomigradFont", {
 
 surface.CreateFont("ScoreboardPlayer", {
 	font = font(),
+	extended = true,
 	size = ScreenScale(7),
 	weight = 1100,
 	outline = false
@@ -101,6 +103,7 @@ surface.CreateFont("ScoreboardPlayer", {
 
 surface.CreateFont("HomigradFontBig", {
 	font = font(),
+	extended = true,
 	size = ScreenScale(12),
 	weight = 1100,
 	outline = false,
@@ -109,6 +112,7 @@ surface.CreateFont("HomigradFontBig", {
 
 surface.CreateFont("HomigradFontMedium", {
 	font = font(),
+	extended = true,
 	size = ScreenScale(8),
 	weight = 1100,
 	outline = false,
@@ -116,6 +120,7 @@ surface.CreateFont("HomigradFontMedium", {
 
 surface.CreateFont("HomigradFontLarge", {
 	font = font(),
+	extended = true,
 	size = ScreenScale(15),
 	weight = 1100,
 	outline = false
@@ -123,6 +128,7 @@ surface.CreateFont("HomigradFontLarge", {
 
 surface.CreateFont("HomigradFontGigantoNormous", {
 	font = font(),
+	extended = true,
 	size = ScreenScale(25),
 	weight = 1100,
 	outline = false,
@@ -131,6 +137,7 @@ surface.CreateFont("HomigradFontGigantoNormous", {
 
 surface.CreateFont("HomigradFontSmall", {
 	font = font(),
+	extended = true,
 	size = 17,
 	weight = 1100,
 	outline = false
@@ -138,6 +145,7 @@ surface.CreateFont("HomigradFontSmall", {
 
 surface.CreateFont("HomigradFontVSmall", {
 	font = font(),
+	extended = true,
 	size = 12,
 	weight = 400,
 	outline = false
@@ -217,9 +225,7 @@ local function CreateRadialMenu(options_arg, bAutoClose)
 		end
 	end
 
-	//hook_Run("radialOptions")
 	local options1 = options_arg or hg.radialOptions
-
 	hg.radialOptions = options1
 	
 	if IsValid(MENUPANELHUYHUY) then
@@ -260,7 +266,6 @@ local function CreateRadialMenu(options_arg, bAutoClose)
 			local functions = hook.GetTable()["radialOptions"]
 			
 			for i, func in SortedPairs(functions) do
-				//if i == "zmeyka_test" then continue end
 				func()
 			end
 		end
@@ -269,13 +274,30 @@ local function CreateRadialMenu(options_arg, bAutoClose)
 	local sizePan = 0
 	local optionSelected = {}
 	menuPanel.Paint = function(self, w, h)
+		local alpha = self:GetAlpha()
+		if alpha > 0 then
+			surface.SetDrawColor(0, 0, 0, alpha * 0.6)
+			surface.DrawRect(0, 0, w, h)
+
+			local centerX, centerY = w / 2, h / 2
+			local maxDist = math.sqrt(centerX^2 + centerY^2)
+			
+			for i = 0, 20 do
+				local dist = i / 20 * maxDist
+				local darkAlpha = alpha * (0.3 - (i / 20) * 0.2)
+				if darkAlpha > 0 then
+					surface.SetDrawColor(0, 0, 0, darkAlpha * 0.3)
+					surface.DrawRect(centerX - dist, centerY - dist, dist * 2, dist * 2)
+				end
+			end
+		end
+
 		local x, y = input.GetCursorPos()
 		x = x - sizeX / 2
 		y = y - sizeY / 2
 		vecXY.x = x
 		vecXY.y = y
 		local deg = (vecXY:GetNormalized() - vecDown):Angle()
-		//deg[2] = deg[2] - 180
 		deg = math.NormalizeAngle((deg[2] - 180) * 2) + 180
 		
 		local options = {}
@@ -301,7 +323,7 @@ local function CreateRadialMenu(options_arg, bAutoClose)
 			optionSelected[num] = optionSelected[num] or 0
 			optionSelected[num] = LerpFT(0.1, optionSelected[num], isMouseIntersecting and 1 or 0)
 
-			if option[3] then --// Multibutton
+			if option[3] then
 				surface.SetMaterial(matHuy)
 				surface.SetDrawColor(isMouseIntersecting and colBlack or colBlack)
 				draw.CirclePart(w / 2, h / 2, r, 40, #options, num)
@@ -320,7 +342,7 @@ local function CreateRadialMenu(options_arg, bAutoClose)
 
 					if paining then
 						math.randomseed(math.Round(CurTime() / 5 + num + i, 0))
-						opt = ""//hg.get_status_message(ply)
+						opt = ""
 						math.randomseed(os.time())
 					end
 
@@ -330,16 +352,15 @@ local function CreateRadialMenu(options_arg, bAutoClose)
 				continue
 			end
 			
-			--print(options_arg ~= nil and true or false)
 			surface.SetMaterial(matHuy)
-			if option[6] and IsColor(option[6]) then --// Custom color
-				if option[7] and IsColor(option[7]) then --// Custom select color
+			if option[6] and IsColor(option[6]) then
+				if option[7] and IsColor(option[7]) then
 					surface.SetDrawColor(option[7]:Lerp(option[6], 1 - optionSelected[num]))
 				else
 					surface.SetDrawColor(colWhiteTransparent:Lerp(option[6], 1 - optionSelected[num]))
 				end
 			else
-				if option[7] and IsColor(option[7]) then --// Custom select color
+				if option[7] and IsColor(option[7]) then
 					surface.SetDrawColor(option[7]:Lerp(options_arg ~= nil and colOption or colBlack, 1 - optionSelected[num]))
 				else
 					surface.SetDrawColor(colWhiteTransparent:Lerp(options_arg ~= nil and colOption or colBlack, 1 - optionSelected[num]))
@@ -350,8 +371,7 @@ local function CreateRadialMenu(options_arg, bAutoClose)
 			local a = -partDeg * num - partDeg / 2
 			a = math.rad(a) + math.pi
 
-			--PrintTable(option)
-			if option[5] then --// Icon
+			if option[5] then
 				local a = -partDeg * num - partDeg / 2
 				a = math.rad(a) + math.pi
 
@@ -362,7 +382,7 @@ local function CreateRadialMenu(options_arg, bAutoClose)
 		
 				surface.DrawTexturedRect(sizeW, sizeH, scrW * 0.1, scrH * 0.1)
 			else
-				local txt = option[2] --// Text
+				local txt = option[2]
 				if txt and !options_old then return end
 				if paining then
 					math.randomseed(math.Round(CurTime() / 5 + num, 0))
@@ -379,14 +399,18 @@ local function CreateRadialMenu(options_arg, bAutoClose)
 			local col = lply:GetPlayerColor():ToColor()
 			draw.SimpleText(lply:GetPlayerName(),"HomigradFontGigantoNormous",scrW * 0.02 * viewLerp,scrH * 0.04, col, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
 			draw.SimpleText( ( (lply.role and lply.role.name) or ""),"HomigradFontGigantoNormous" ,scrW * 0.02 * viewLerp,scrH * 0.095, lply.role and lply.role.color or incoentCol, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
-			-- какой же тут говнокод все же...
-			-- local walkBtn = input.LookupBinding("+walk") or "BIND YOUR +WALK KEY PLEASE. WRITE \"bind alt +walk\" IN CONSOLE FOR THE LOVE OF GOD"
-			-- draw.SimpleText(walkBtn .. " | Misc", "HomigradFont", scrW * (0.981 + (0.04 * (1-viewLerp))),scrH * 0.9615, colBack, TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER)
-			-- draw.SimpleText(walkBtn .. " | Misc", "HomigradFont", scrW * (0.98 + (0.04 * (1-viewLerp))),scrH * 0.96, colWhite, TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER)
+			
+			local walkBtn = input.LookupBinding("+walk") or "BIND YOUR +WALK KEY PLEASE. WRITE \"bind alt +walk\" IN CONSOLE FOR THE LOVE OF GOD"
+            local ply = LocalPlayer()
+            local wep = ply:GetActiveWeapon()
+
+            if IsValid(wep) and wep:IsWeapon() and lply:GetActiveWeapon():GetClass() ~= "weapon_hands_sh" then
+	            draw.SimpleText(walkBtn .. " | AMMO INSPECT", "HomigradFont", scrW * (0.981 + (0.04 * (1-viewLerp))),scrH * 0.9615, colBack, TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER) -- будет конфликтовать
+	            draw.SimpleText(walkBtn .. " | AMMO INSPECT", "HomigradFont", scrW * (0.98 + (0.04 * (1-viewLerp))),scrH * 0.96, colWhite, TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER)
+		   end
 		end
 	end
 end
-
 local function PressRadialMenu(mouseClick)
 	local options = hg.radialOptions
 	--print(options[current_option][1])
