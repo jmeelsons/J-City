@@ -102,22 +102,46 @@ local keydownattack
 local keydownattack2
 local keydownreload
 
+local showSpectateInfo = true
+local altWasPressed = false
+
 hook.Add("HUDPaint","FUCKINGSAMENAMEUSEDINHOOKFUCKME",function()
     if LocalPlayer():Alive() then return end
-	local spect = LocalPlayer():GetNWEntity("spect")
-	if not IsValid(spect) then return end
-	if viewmode == 3 then return end
-	
-	surface.SetFont("HomigradFont")
-	surface.SetTextColor(255, 255, 255, 255)
-	local txt = "Spectating player: "..spect:Name()
-	local w, h = surface.GetTextSize(txt)
-	surface.SetTextPos(ScrW() / 2 - w / 2, ScrH() / 8 * 7)
-	surface.DrawText(txt)
-	local txt = "In-game name: "..spect:GetPlayerName()
-	local w, h = surface.GetTextSize(txt)
-	surface.SetTextPos(ScrW() / 2 - w / 2, ScrH() / 8 * 7 + h)
-	surface.DrawText(txt)
+
+    local altPressed = input.IsKeyDown(KEY_LALT)
+    if altPressed and not altWasPressed then
+        showSpectateInfo = not showSpectateInfo
+    end
+    altWasPressed = altPressed
+    
+    if not showSpectateInfo then return end
+    
+    local spect = LocalPlayer():GetNWEntity("spect")
+    if not IsValid(spect) then return end
+    if viewmode == 3 then return end
+    
+    surface.SetFont("HomigradFont")
+    surface.SetTextColor(255, 255, 255, 255)
+    
+    local scrW, scrH = ScrW(), ScrH()
+    
+    local txt1 = "Spectating player: "..spect:Name()
+    local w1, h1 = surface.GetTextSize(txt1)
+    local textX = scrW / 2 - w1 / 2
+    local textY = scrH / 8.3 * 7
+    
+    surface.SetTextPos(textX, textY)
+    surface.DrawText(txt1)
+    
+    local txt2 = "In-game name: "..spect:GetPlayerName()
+    local w2, h2 = surface.GetTextSize(txt2)
+    surface.SetTextPos(scrW / 2 - w2 / 2, textY + h1)
+    surface.DrawText(txt2)
+    
+    local txt3 = "SteamID: "..spect:SteamID() .. " | "..spect:SteamID64()
+    local w3, h3 = surface.GetTextSize(txt3)
+    surface.SetTextPos(scrW / 2 - w3 / 2, textY + h1 + h2)
+    surface.DrawText(txt3)
 end)
 
 hook.Add("HG_CalcView", "zzzzzzzUwU", function(ply, pos, angles, fov)
@@ -326,6 +350,7 @@ end
 
 surface.CreateFont("ZB_InterfaceSmall", {
     font = font(),
+	extended = true,
     size = ScreenScale(6),
     weight = 400,
     antialias = true
@@ -333,6 +358,7 @@ surface.CreateFont("ZB_InterfaceSmall", {
 
 surface.CreateFont("ZB_InterfaceMedium", {
     font = font(),
+	extended = true,
     size = ScreenScale(10),
     weight = 400,
     antialias = true
@@ -340,6 +366,7 @@ surface.CreateFont("ZB_InterfaceMedium", {
 
 surface.CreateFont("ZB_ScrappersMedium", {
     font = font(),
+	extended = true,
     size = ScreenScale(10),
     weight = 400,
     antialias = true
@@ -347,6 +374,7 @@ surface.CreateFont("ZB_ScrappersMedium", {
 
 surface.CreateFont("ZB_InterfaceMediumLarge", {
     font = font(),
+	extended = true,
     size = 35,
     weight = 400,
     antialias = true
@@ -354,6 +382,7 @@ surface.CreateFont("ZB_InterfaceMediumLarge", {
 
 surface.CreateFont("ZB_InterfaceLarge", {
     font = font(),
+	extended = true,
     size = ScreenScale(20),
     weight = 400,
     antialias = true
@@ -361,6 +390,7 @@ surface.CreateFont("ZB_InterfaceLarge", {
 
 surface.CreateFont("ZB_InterfaceHumongous", {
     font = font(),
+	extended = true,
     size = 200,
     weight = 400,
     antialias = true
@@ -525,7 +555,7 @@ function GM:ScoreboardShow()
 	local w, h = ScreenScale(30),ScreenScale(6)
 	muteallbut:SetPos(scoreBoardMenu:GetWide()-w*2.3,scoreBoardMenu:GetTall() - h * 1.5)
 	muteallbut:SetSize(w, h)
-	muteallbut:SetText("Mute all")
+	muteallbut:SetText("Mute everyone")
 	
 	muteallbut.Paint = function(self,w,h)
 		surface.SetDrawColor( not hg.muteall and 255 or 0, hg.muteall and 255 or 0, 0, 128)
@@ -537,19 +567,9 @@ function GM:ScoreboardShow()
 		
 		for i,ply in player.Iterator() do
 			if hg.muteall then
-				//ply.oldmutedspect = ply:IsMuted()
-
 				ply:SetVoiceVolumeScale(0)
-				//if IsValid(ply.soundButton) then
-					//ply.soundButton:SetImage(not ply:IsMuted() && "icon16/sound.png" || "icon16/sound_mute.png")
-				//end
 			else
 				ply:SetVoiceVolumeScale((!hg.mutespect or ply:Alive()) and (hg.playerInfo[ply:SteamID()] and hg.playerInfo[ply:SteamID()][2] or 1) or 0)
-				//ply:SetMuted(ply.oldmuted)
-				//if IsValid(ply.soundButton) then
-					//ply.soundButton:SetImage(not ply:IsMuted() && "icon16/sound.png" || "icon16/sound_mute.png")
-				//end
-				//ply.oldmuted = nil
 			end
 		end 
 	end
@@ -573,24 +593,13 @@ function GM:ScoreboardShow()
 
 			if hg.mutespect then
 				ply:SetVoiceVolumeScale(0)
-				//ply.oldmutedspect = ply:IsMuted()
-
-				//ply:SetMuted(true)
-				//if IsValid(ply.soundButton) then
-					//ply.soundButton:SetImage(not ply:IsMuted() && "icon16/sound.png" || "icon16/sound_mute.png")
-				//end
 			else
 				ply:SetVoiceVolumeScale(!hg.muteall and (hg.playerInfo[ply:SteamID()] and hg.playerInfo[ply:SteamID()][2] or 1) or 0)
-				//ply:SetMuted(ply.oldmutedspect)
-				//if IsValid(ply.soundButton) then
-					//ply.soundButton:SetImage(not ply:IsMuted() && "icon16/sound.png" || "icon16/sound_mute.png")
-				//end
-				//ply.oldmutedspect = nil
 			end
 		end 
 	end
 
-	local ServerName = GetHostName() or "ZCity | Developer Server | #01"
+	local ServerName = "J-City | Furry love server"
 	local tick
 	scoreBoardMenu.PaintOver = function(self,w,h)
 		surface.SetDrawColor( 255, 0, 0, 128)
@@ -626,6 +635,7 @@ function GM:ScoreboardShow()
 		surface.SetTextPos(w * 0.5 - lengthX/2,ScreenScale(25))
 		surface.DrawText(txt)
 	end
+	
 	-- TEAMSELECTION
 	if LocalPlayer():Team() ~= TEAM_SPECTATOR then
 		local SPECTATE = vgui.Create("DButton",scoreBoardMenu)
@@ -676,15 +686,13 @@ function GM:ScoreboardShow()
 			surface.DrawText("Join")
 		end
 	end
-
+    
 	--без матов
 
 	local DScrollPanel = vgui.Create("DScrollPanel", scoreBoardMenu)
 	DScrollPanel:SetPos(10, ScreenScaleH(58))
 	DScrollPanel:SetSize(sizeX/2 - 10, sizeY - ScreenScaleH(72))
 	function DScrollPanel:Paint( w, h )
-		-- BlurBackground(self)
-
 		surface.SetDrawColor(0, 0, 0, 125)
 		surface.DrawRect(0, 0, w, h)
 
@@ -693,7 +701,7 @@ function GM:ScoreboardShow()
 	end
 
 	local disappearance = lply:GetNetVar("disappearance", nil)
-	for i, ply in player.Iterator() do -- надо это говно переделать.
+	for i, ply in player.Iterator() do
 		if ply:Team() == TEAM_SPECTATOR then continue end
 		if CurrentRound().name == "fear" and !ply:Alive() then continue end
 		if disappearance and ply != lply then continue end
@@ -703,16 +711,76 @@ function GM:ScoreboardShow()
 		but:Dock(TOP)
 		but:DockMargin(8, 6, 8, -1)
 		but:SetText("")
+
+		local avatar = vgui.Create("AnimatedAvatarImage", but)
+		avatar:SetSize(ScreenScaleH(18), ScreenScaleH(18))
+		avatar:SetPos(5, ScreenScaleH(2))
+		avatar:SetPlayer(ply, 64)
 		
 		local soundButton = vgui.Create("DImageButton", but)
 		soundButton:Dock(RIGHT)
 		soundButton:SetSize( 30, 0 )
 		soundButton:DockMargin(5,10,45,10)
-		
-		soundButton:SetImage(not ply:IsMuted() && "icon16/sound.png" || "icon16/sound_mute.png") 
-		soundButton.DoClick = function(self)
-			OpenPlayerSoundSettings(self, ply) 
+
+		soundButton:SetImage(not ply:IsMuted() && "icon16/sound.png" || "icon16/sound_mute.png")
+
+		soundButton.LastTick = 0
+		soundButton.Muted = ply:IsMuted()
+
+		local function UpdateSoundIcon()
+			if IsValid(soundButton) and IsValid(ply) then
+				soundButton:SetImage(not ply:IsMuted() && "icon16/sound.png" || "icon16/sound_mute.png")
+				soundButton.Muted = ply:IsMuted()
+			end
 		end
+
+		soundButton.DoClick = function(self)
+			if not IsValid(ply) then return end
+			ply:SetMuted(not ply:IsMuted())
+			UpdateSoundIcon()
+		end
+
+		soundButton.DoRightClick = function(self)
+			OpenPlayerSoundSettings(self, ply)
+		end
+
+		soundButton.OnMouseWheeled = function(self, delta)
+			if not IsValid(ply) then return end
+			
+			local currentVolume = ply:GetVoiceVolumeScale() or 0
+			local newVolume = currentVolume + (delta / 100 * 5)
+			newVolume = math.Clamp(newVolume, 0, 1)
+			
+			ply:SetVoiceVolumeScale(newVolume)
+			self.LastTick = CurTime()
+
+			if newVolume <= 0 then
+				ply:SetMuted(true)
+				UpdateSoundIcon()
+			elseif newVolume > 0 and ply:IsMuted() then
+				ply:SetMuted(false)
+				UpdateSoundIcon()
+			end
+		end
+
+		soundButton.PaintOver = function(self, w, h)
+			if not IsValid(ply) then return end
+			
+			local a = 255 - math.Clamp(CurTime() - (self.LastTick or 0), 0, 3) * 255
+			if (a <= 0) then return end
+			
+			draw.RoundedBox(4, 0, 0, w, h, Color(0, 0, 0, a * 0.75))
+			draw.SimpleText(
+				math.ceil(ply:GetVoiceVolumeScale() * 100) .. "%", 
+				"DermaDefaultBold", 
+				w / 2, 
+				h / 2, 
+				Color(255, 255, 255, a), 
+				TEXT_ALIGN_CENTER, 
+				TEXT_ALIGN_CENTER
+			)
+		end
+		
 		ply.soundButton = soundButton
 	
 		but.Paint = function(self, w, h)
@@ -721,17 +789,18 @@ function GM:ScoreboardShow()
 			surface.DrawRect(0, 0, w, h)
 			surface.SetDrawColor(colBlue.r, colBlue.g, colBlue.b, colBlue.a)
 			surface.DrawRect(0, h / 2, w, h / 2)
-	
-			surface.SetFont("ZB_InterfaceMediumLarge")
-			surface.SetTextColor(col.r, col.g, col.b, col.a)
-			local lengthX, lengthY = surface.GetTextSize(ply:Name() or "He quited...")
-			surface.SetTextPos(15, h / 2 - lengthY / 2)
+
+			surface.SetFont( "ZB_InterfaceMediumLarge" )
+			surface.SetTextColor(col.r,col.g,col.b,col.a)
+			local lengthX, lengthY = surface.GetTextSize( ply:Name() or "He quited..." )
+			-- Сдвигаем текст вправо, чтобы не перекрывать аватар
+			surface.SetTextPos(ScreenScaleH(24), h/2 - lengthY/2)
 			surface.DrawText(ply:Name() or "He quited...")
 	
 			surface.SetFont("ZB_InterfaceMediumLarge")
 			surface.SetTextColor(col.r, col.g, col.b, col.a)
-			local lengthX, lengthY = surface.GetTextSize(ply:Ping() or "He quited...")
-			surface.SetTextPos(w - lengthX - 15, h / 2 - lengthY / 2)
+			local pingX, pingY = surface.GetTextSize(ply:Ping() or "He quited...")
+			surface.SetTextPos(w - pingX - 15, h / 2 - pingY / 2)
 			surface.DrawText(ply:Ping() or "He quited...")
 		end
 
@@ -741,27 +810,60 @@ function GM:ScoreboardShow()
 		end
 
 		function but:DoRightClick()
-			--if ply:IsBot() then chat.AddText(Color(255,0,0), "no, you can't") return end
 			local Menu = DermaMenu()
 			Menu:AddOption( "Account", function(self)
 				zb.Experience.AccountMenu( ply )
 			end)
 			Menu:AddOption( "Copy SteamID", function(self)
 				SetClipboardText(ply:SteamID())
+				surface.PlaySound( "buttons/button5.wav" )
 			end)
+			Menu:AddOption( "Copy SteamID64", function(self)
+				SetClipboardText(ply:SteamID64())
+				surface.PlaySound( "buttons/button5.wav" )
+			end)
+
+			Menu:AddSpacer()
+
+            if LocalPlayer():IsAdmin() or LocalPlayer():IsSuperAdmin() then
+
+			Menu:AddOption( "Bring", function(self)
+                RunConsoleCommand( "sam", "bring", ply:SteamID() )
+                surface.PlaySound( "buttons/button5.wav" )
+            end)
+			Menu:AddOption( "Goto", function(self)
+                RunConsoleCommand( "sam", "goto", ply:SteamID() )
+                surface.PlaySound( "buttons/button5.wav" )
+            end)
+			Menu:AddOption( "Freeze", function(self)
+                RunConsoleCommand( "sam", "freeze", ply:SteamID() )
+                surface.PlaySound( "buttons/button5.wav" )
+            end)
+			Menu:AddOption( "Unfreeze", function(self)
+                RunConsoleCommand( "sam", "unfreeze", ply:SteamID() )
+                surface.PlaySound( "buttons/button5.wav" )
+            end)		
+			Menu:AddOption( "Slay", function(self)
+                RunConsoleCommand( "sam", "slay", ply:SteamID() )
+                surface.PlaySound( "buttons/button5.wav" )
+            end)
+			Menu:AddOption( "Kick", function(self)
+                RunConsoleCommand( "sam", "kick", ply:SteamID(), "Kicked!" )
+                surface.PlaySound( "buttons/button5.wav" )
+            end)						
+        end
 
 			Menu:Open()
 		end
 	
 		DScrollPanel:AddItem(but)
 	end
+	
 	-- SPECTATORS
 	local DScrollPanel = vgui.Create("DScrollPanel", scoreBoardMenu)
 	DScrollPanel:SetPos(sizeX/2 + 5, ScreenScaleH(58))
 	DScrollPanel:SetSize(sizeX/2 - 15, sizeY - ScreenScaleH(72))
 	function DScrollPanel:Paint( w, h )
-		-- BlurBackground(self)
-
 		surface.SetDrawColor(0, 0, 0, 125)
 		surface.DrawRect(0, 0, w, h)
 
@@ -780,15 +882,75 @@ function GM:ScoreboardShow()
 		but:DockMargin( 8, 6, 8, -1 )
 		but:SetText("")
 
+		local avatar = vgui.Create("AnimatedAvatarImage", but)
+		avatar:SetSize(ScreenScaleH(18), ScreenScaleH(18))
+		avatar:SetPos(5, ScreenScaleH(2))
+		avatar:SetPlayer(ply, 64)
+
 		local soundButton = vgui.Create("DImageButton", but)
 		soundButton:Dock(RIGHT)
 		soundButton:SetSize( 30, 0 )
 		soundButton:DockMargin(5,10,45,10)
-		
-		soundButton:SetImage(not ply:IsMuted() && "icon16/sound.png" || "icon16/sound_mute.png") 
+
+		soundButton:SetImage(not ply:IsMuted() && "icon16/sound.png" || "icon16/sound_mute.png")
+
+		soundButton.LastTick = 0
+		soundButton.Muted = ply:IsMuted()
+
+		local function UpdateSoundIcon()
+			if IsValid(soundButton) and IsValid(ply) then
+				soundButton:SetImage(not ply:IsMuted() && "icon16/sound.png" || "icon16/sound_mute.png")
+				soundButton.Muted = ply:IsMuted()
+			end
+		end
+
 		soundButton.DoClick = function(self)
+			if not IsValid(ply) then return end
+			ply:SetMuted(not ply:IsMuted())
+			UpdateSoundIcon()
+		end
+
+		soundButton.DoRightClick = function(self)
 			OpenPlayerSoundSettings(self, ply)
 		end
+
+		soundButton.OnMouseWheeled = function(self, delta)
+			if not IsValid(ply) then return end
+			
+			local currentVolume = ply:GetVoiceVolumeScale() or 0
+			local newVolume = currentVolume + (delta / 100 * 5)
+			newVolume = math.Clamp(newVolume, 0, 1)
+			
+			ply:SetVoiceVolumeScale(newVolume)
+			self.LastTick = CurTime()
+			
+			if newVolume <= 0 then
+				ply:SetMuted(true)
+				UpdateSoundIcon()
+			elseif newVolume > 0 and ply:IsMuted() then
+				ply:SetMuted(false)
+				UpdateSoundIcon()
+			end
+		end
+
+		soundButton.PaintOver = function(self, w, h)
+			if not IsValid(ply) then return end
+			
+			local a = 255 - math.Clamp(CurTime() - (self.LastTick or 0), 0, 3) * 255
+			if (a <= 0) then return end
+			
+			draw.RoundedBox(4, 0, 0, w, h, Color(0, 0, 0, a * 0.75))
+			draw.SimpleText(
+				math.ceil(ply:GetVoiceVolumeScale() * 100) .. "%", 
+				"DermaDefaultBold", 
+				w / 2, 
+				h / 2, 
+				Color(255, 255, 255, a), 
+				TEXT_ALIGN_CENTER, 
+				TEXT_ALIGN_CENTER
+			)
+		end
+		
 		ply.soundButton = soundButton
 
 		but.Paint = function(self,w,h)
@@ -801,13 +963,13 @@ function GM:ScoreboardShow()
 			surface.SetFont( "ZB_InterfaceMediumLarge" )
 			surface.SetTextColor(col.r,col.g,col.b,col.a)
 			local lengthX, lengthY = surface.GetTextSize( ply:Name() or "He quited..." )
-			surface.SetTextPos(15,h/2 - lengthY/2)
+			surface.SetTextPos(ScreenScaleH(24), h/2 - lengthY/2)
 			surface.DrawText(ply:Name() or "He quited...")
 
 			surface.SetFont( "ZB_InterfaceMediumLarge" )
 			surface.SetTextColor(col.r,col.g,col.b,col.a)
-			local lengthX, lengthY = surface.GetTextSize( ply:Ping() or "He quited..." )
-			surface.SetTextPos(w - lengthX -15,h/2 - lengthY/2)
+			local pingX, pingY = surface.GetTextSize( ply:Ping() or "He quited..." )
+			surface.SetTextPos(w - pingX -15,h/2 - pingY/2)
 			surface.DrawText(ply:Ping() or "He quited...")
 		end
 
@@ -817,21 +979,49 @@ function GM:ScoreboardShow()
 		end
 
 		function but:DoRightClick()
-			--if ply:IsBot() then chat.AddText(Color(255,0,0), "no, you can't") return end
 			local Menu = DermaMenu()
 			Menu:AddOption( "Account", function(self)
 				zb.Experience.AccountMenu( ply )
 			end)
 			Menu:AddOption( "Copy SteamID", function(self)
 				SetClipboardText(ply:SteamID())
+				surface.PlaySound( "buttons/button5.wav" )
 			end)
-			--Menu:AddOption( "Medal", function(self) 
-			--	zb.Experience.OpenMenu(ply)
-			--	timer.Simple( .1, function()
-			--		zb.Experience.Menu(ply)
-			--	end)
-			--end) 
+			Menu:AddOption( "Copy SteamID64", function(self)
+				SetClipboardText(ply:SteamID64())
+				surface.PlaySound( "buttons/button5.wav" )
+			end)
 
+			Menu:AddSpacer()
+
+            if LocalPlayer():IsAdmin() or LocalPlayer():IsSuperAdmin() then
+
+			Menu:AddOption( "Bring", function(self)
+                RunConsoleCommand( "sam", "bring", ply:SteamID() )
+                surface.PlaySound( "buttons/button5.wav" )
+            end)
+			Menu:AddOption( "Goto", function(self)
+                RunConsoleCommand( "sam", "goto", ply:SteamID() )
+                surface.PlaySound( "buttons/button5.wav" )
+            end)
+			Menu:AddOption( "Freeze", function(self)
+                RunConsoleCommand( "sam", "freeze", ply:SteamID() )
+                surface.PlaySound( "buttons/button5.wav" )
+            end)
+			Menu:AddOption( "Unfreeze", function(self)
+                RunConsoleCommand( "sam", "unfreeze", ply:SteamID() )
+                surface.PlaySound( "buttons/button5.wav" )
+            end)		
+			Menu:AddOption( "Slay", function(self)
+                RunConsoleCommand( "sam", "slay", ply:SteamID() )
+                surface.PlaySound( "buttons/button5.wav" )
+            end)
+			Menu:AddOption( "Kick", function(self)
+                RunConsoleCommand( "sam", "kick", ply:SteamID(), "Kicked!" )
+                surface.PlaySound( "buttons/button5.wav" )
+            end)						
+        end	
+				
 			Menu:Open()
 		end
 
@@ -1113,3 +1303,13 @@ hook.Add("Player Spawn", "GuiltKnown",function(ply)
 		system.FlashWindow()
 	end
 end)
+--[[
+hook.Add("Initialize", "suka", function()
+    GM = GM or GAMEMODE
+
+    function GM:PlayerStartVoice(ply)
+        if not IsValid(ply) or not ply:Alive() then
+            return
+        end
+    end
+end)]]
