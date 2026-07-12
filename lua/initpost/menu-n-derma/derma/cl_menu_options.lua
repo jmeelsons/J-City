@@ -30,24 +30,35 @@ end
 
 surface.CreateFont("ZCity_setiings_tiny", {
 	font = font(),
+    extended = true,
 	size = ScreenScale(7),
 	weight = 100
 })
 
 surface.CreateFont("ZCity_setiings_fine", {
 	font = font(),
+    extended = true,
 	size = ScreenScale(10),
 	weight = 100
 })
 
 surface.CreateFont("ZCity_setiings_category", {
 	font = font(),
+    extended = true,
 	size = ScreenScale(15),
 	weight = 100
 })
 
+surface.CreateFont("ZCity_search_font", {
+    font = font(),
+    extended = true,
+    size = ScreenScale(12),
+    weight = 100
+})
+
 
 hg.settings:AddOpt("Gameplay","hg_old_notificate", "Old Notifications")
+hg.settings:AddOpt("Gameplay","uap_dance_button_enabled", "Disable Dance radial menu")
 hg.settings:AddOpt("Gameplay","hg_cheats", "Enable Cheats")
 hg.settings:AddOpt("Gameplay","hg_showthoughts", "Show thoughts")
 hg.settings:AddOpt("Gameplay","hg_hints", "Show hints")
@@ -57,6 +68,7 @@ hg.settings:AddOpt("Gameplay","hg_deathfadeout", "Death fade out")
 --hg_deathfadeout
 if not game.IsDedicated() then
 	hg.settings:AddOpt("Server-side settings","hg_toughnpcs", "Tough npcs")
+    hg.settings:AddOpt("Server-side settings","hg_weight_enabled", "Toggle infuriating weight system")
 	hg.settings:AddOpt("Server-side settings","hg_thirdperson", "Thirdperson (WIP)")
 	hg.settings:AddOpt("Server-side settings","hg_legacycam", "Legacy camera")
 	hg.settings:AddOpt("Server-side settings","hg_ragdollcombat", "Ragdoll combat mode")
@@ -68,9 +80,9 @@ if not game.IsDedicated() then
 	hg.settings:AddOpt("Server-side settings","hg_slings", "Sling system")
 	hg.settings:AddOpt("Server-side settings","hg_allow_gopro", "Allow GoPro-like first-person camera")
 	hg.settings:AddOpt("Server-side settings","hg_allow_gopro_pos", "Allow editing GoPro camera position")
-	hg.settings:AddOpt("Server-side settings","hg_giveammomul", "Multiply given ammo for weapon spawned from spawnmenu")
+    hg.settings:AddOpt("Server-side settings","hg_giveammomul", "Multiply given ammo for weapon spawned from spawnmenu")
 	hg.settings:AddOpt("Server-side settings","hg_ixanims", "Toggle Helix-like animations on NPC models for players. Experimental")
-	hg.settings:AddOpt("Server-side settings","hg_coolhands", "Give cool hands instead of default hands on spawn")
+    hg.settings:AddOpt("Server-side settings","hg_coolhands", "Give cool hands instead of default hands on spawn")
 	hg.settings:AddOpt("Server-side settings","hg_loadcontent", "Toggle loading content to clients using 'resource.AddWorkshop' (need server restart to apply)")
     hg.settings:AddOpt("Server-side settings","homicide_traitoramount", "Homicide: Traitor Amount", nil, nil, "int")
 end
@@ -78,10 +90,13 @@ end
 --hg_furcity
 --hg_legacycam
 --hg_toughnpcs
+--hg_weight
 
-hg.settings:AddOpt("Debug","hg_show_hitposmuzzle", "Show weapon hitpos")
-hg.settings:AddOpt("Debug","hg_setzoompos", "Edit weapon zoompos, check console for results")
-hg.settings:AddOpt("Debug","hg_show_hitbox", "Show hitboxes")
+if LocalPlayer() and LocalPlayer():IsAdmin() then
+    hg.settings:AddOpt("Debug","hg_show_hitposmuzzle", "Show weapon hitpos")
+    hg.settings:AddOpt("Debug","hg_setzoompos", "Edit weapon zoompos, check console for results")
+    hg.settings:AddOpt("Debug","hg_show_hitbox", "Show hitboxes")
+end
 
 hg.settings:AddOpt("Optimization","hg_potatopc", "Potato PC Mode")
 hg.settings:AddOpt("Optimization","hg_anims_draw_distance", "Animations Draw Distance", true, nil, "int")
@@ -90,14 +105,30 @@ hg.settings:AddOpt("Optimization","hg_attachment_draw_distance", "Attachment Dra
 hg.settings:AddOpt("Optimization","hg_maxsmoketrails", "Maximum Smoke Trails", nil, nil, "int")
 hg.settings:AddOpt("Optimization","hg_tpik_distance", "TPIK Render Distance", true, nil, "int")
 
+hg.settings:AddOpt("Graphics","pp_pbb", "Physically Based Bloom")
+--hg.settings:AddOpt("Graphic","pp_ssss", "Screen Space Sun Shafts")
+hg.settings:AddOpt("Graphics","pp_ssss", "Contrast Adaptive Sharpening")
+hg.settings:AddOpt("Graphics","cl_physsky", "Physical Sky")
+hg.settings:AddOpt("Graphics","pp_ssdo", "Screen Space Direction Occlusion")
+hg.settings:AddOpt("Graphics","r_proj_volumetric", "Volumetric Light")
+hg.settings:AddOpt("Graphics","fog_point_lights", "Point Lights in Fog")
+hg.settings:AddOpt("Graphics","r_sharpness", "Sharpness")
+--hg.settings:AddOpt("Graphics","pp_hbao", "Horizon-Based Ambient Occlusion")
+--hg.settings:AddOpt("Graphics","r_ddof_gshader", "Bokeh Dynamic Depth Of Field")
+hg.settings:AddOpt("Graphics","r_smaa", "SMAA")
+--hg.settings:AddOpt("Graphics","r_motionblur", "Motion Blur")
+
 hg.settings:AddOpt("Blood","hg_blood_draw_distance", "Blood Draw Distance")
 hg.settings:AddOpt("Blood","hg_blood_fps", "Blood FPS")
 hg.settings:AddOpt("Blood","hg_blood_sprites", "Blood Sprites (DISABLED FOR EVERYONE)")
 hg.settings:AddOpt("Blood","hg_old_blood", "Old blood")
 
-hg.settings:AddOpt("UI","hg_font", "Set Custom Font", false, true)
+hg.settings:AddOpt("UI","hg_font", "Change Custom Font", false, true)
+hg.settings:AddOpt("UI","hg_weapon_selector_style", "Weapon Selector Styles", false, true)
+hg.settings:AddOpt("UI","mzb_MoodleHud_enabled", "Toggle moodles")
 
 hg.settings:AddOpt("Weapons","hg_weaponshotblur_enable", "Shooting Blur")
+hg.settings:AddOpt("Weapons","hg_ammo_hud_enabled", "Disable/Enable Ammo HUD (+ Immersive)")
 hg.settings:AddOpt("Weapons","hg_dynamic_mags", "Dynamic Ammo Inspect")
 hg.settings:AddOpt("Weapons","hg_zoomsensitivity", "Scope sensitivity")
 hg.settings:AddOpt("Weapons","hg_highpitchgunfire", "Toggle high pitched gunfire sounds inside buildings")
@@ -320,7 +351,6 @@ end
 function hg.DrawSettings(ParentPanel)
     ParentPanel:SetAlpha(0)
     ParentPanel.Paint = function(self,w,h)
-
         surface.SetDrawColor(28,28,28,255)
         surface.DrawRect(0, 0, w, h)
 
@@ -339,31 +369,116 @@ function hg.DrawSettings(ParentPanel)
         surface.SetDrawColor(0, 0, 0)
         surface.SetMaterial(gradient_l)
         surface.DrawTexturedRect(0, 0, border_size, sh)
-		surface.SetMaterial(blur)
+        surface.SetMaterial(blur)
         surface.SetDrawColor(28,28,28,208)
         surface.DrawRect(0, 0, w, h)
     end
     hg.DrawBlur(ParentPanel, 5)
     ParentPanel:AlphaTo(255,0.15,0)
+    
     local pppanel3 = vgui.Create('DScrollPanel', ParentPanel)
     pppanel3:SetSize(ParentPanel:GetWide(), ParentPanel:GetTall())
     pppanel3:SetPos(0,0)
-    --pppanel3:SetAlpha(0)
-    pppanel3.Paint = function()end
-    -- 🥴 <- лучший смайлик
+    pppanel3.Paint = function() end
 
-    local yOffset = pppanel3:GetTall()/100
+    local searchPanel = vgui.Create('DPanel', pppanel3)
+    searchPanel:SetSize(pppanel3:GetWide() / 2, pppanel3:GetTall() * 0.06)
+    searchPanel:SetPos(pppanel3:GetWide() / 4, pppanel3:GetTall() / 100)
+    searchPanel.Paint = function(self,w,h)
+        surface.SetDrawColor(60,60,60,145)
+        surface.DrawRect(0, 0, w, h)
+        surface.SetDrawColor(42, 42, 42, 184)
+        surface.DrawRect(0, h-2, w, 2)
+    end
 
-    for categoryName, categoryTable in pairs(hg.settings.tbl) do
-        local category = hg.CreateCategory(categoryName, pppanel3, yOffset)
-        yOffset = yOffset + category:GetTall() + 12
-        for convarName, settingData in pairs(categoryTable) do
-            local vbv = hg.CreateButton(settingData,convarName,pppanel3,yOffset)
-            if not vbv then continue end
-            yOffset = yOffset + (vbv:GetTall()) + 12
+    local searchEntry = vgui.Create('DTextEntry', searchPanel)
+    searchEntry:SetSize(searchPanel:GetWide() - 20, searchPanel:GetTall() - 10)
+    searchEntry:SetPos(10, 5)
+    searchEntry:SetText("")
+    searchEntry:SetFont('ZCity_search_font')
+    searchEntry:SetTextColor(Color(200, 200, 200, 200))
+    
+    local searchPlaceholder = "Search..."
+    
+    searchEntry.Paint = function(self, w, h)
+        surface.SetDrawColor(30, 30, 30, 200)
+        surface.DrawRect(0, 0, w, h)
+        surface.SetDrawColor(80, 80, 80, 255)
+        surface.DrawOutlinedRect(0, 0, w, h)
+        
+        if self:GetText() == "" and not self:HasFocus() then
+            draw.SimpleText(searchPlaceholder, 'ZCity_search_font', 10, h/2, Color(150, 150, 150, 150), TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
+        end
+        
+        self:DrawTextEntryText(color_white, clr_8, color_white)
+    end
+
+    local settingPanels = {}
+    
+    local function rebuildSettings(searchText)
+        for _, panel in ipairs(settingPanels) do
+            if IsValid(panel) then
+                panel:Remove()
+            end
+        end
+        settingPanels = {}
+        
+        local yOffset = searchPanel:GetTall() + pppanel3:GetTall() / 100 + 12
+        
+        for categoryName, categoryTable in pairs(hg.settings.tbl) do
+            local matchingItems = {}
+
+            for convarName, settingData in pairs(categoryTable) do
+                local title = settingData[3] or ""
+                local categoryNameLower = categoryName:lower()
+                local titleLower = title:lower()
+                local searchLower = searchText:lower()
+                
+                if searchText == "" or 
+                   string.find(categoryNameLower, searchLower, 1, true) or 
+                   string.find(titleLower, searchLower, 1, true) then
+                    table.insert(matchingItems, {convarName = convarName, settingData = settingData})
+                end
+            end
+
+            if #matchingItems > 0 then
+                local category = hg.CreateCategory(categoryName, pppanel3, yOffset)
+                table.insert(settingPanels, category)
+                yOffset = yOffset + category:GetTall() + 12
+                
+                for _, item in ipairs(matchingItems) do
+                    local vbv = hg.CreateButton(item.settingData, item.convarName, pppanel3, yOffset)
+                    if IsValid(vbv) then
+                        table.insert(settingPanels, vbv)
+                        yOffset = yOffset + vbv:GetTall() + 12
+                    end
+                end
+            end
+        end
+
+        local pppanel23 = vgui.Create('DPanel', pppanel3)
+        pppanel23:SetSize(0, 0)
+        pppanel23:SetPos(0, yOffset + 12)
+        table.insert(settingPanels, pppanel23)
+    end
+
+    local searchTimer = 0
+    searchEntry.OnValueChange = function(self, val)
+        searchTimer = CurTime() + 0.3
+    end
+
+    pppanel3.Think = function()
+        if searchTimer > 0 and CurTime() >= searchTimer and IsValid(pppanel3) then
+            searchTimer = 0
+            if IsValid(searchEntry) then
+                rebuildSettings(searchEntry:GetText())
+            end
         end
     end
-    local pppanel23 = vgui.Create('DPanel', pppanel3)
-    pppanel23:SetSize(0, 0)
-    pppanel23:SetPos(0,yOffset+12)
+
+    timer.Simple(0.1, function()
+        if IsValid(searchEntry) and IsValid(pppanel3) then
+            rebuildSettings("")
+        end
+    end)
 end
