@@ -7,6 +7,8 @@ ESP.Enabled = false
 ESP.InAdminMode = false
 ESP.AllESP = false
 
+local HIDE_STEAMID = "" -- your steamid
+
 local ESPEye = CreateClientConVar("zb_espeye", "0", true, false, "Show admin ESP eye trace line")
 
 local col_default = Color(255, 0, 0)
@@ -14,6 +16,7 @@ local col_white = Color(255, 255, 255)
 local col_gray = Color(180, 180, 180)
 local col_weapon = Color(255, 200, 100)
 local col_box_outline = Color(0, 0, 0, 200)
+local col_admin = Color(255, 0, 0)
 
 local teamColors = {
 	[0] = Color(200, 200, 200),
@@ -62,10 +65,11 @@ local weaponClasses = {
 	["weapon_frag"] = "Grenade",
 	["weapon_crowbar"] = "Melee",
 	["weapon_stunstick"] = "Melee",
-	["weapon_physcannon"] = "Tool",
-	["weapon_physgun"] = "Tool",
+	["weapon_physcannon"] = "Physcannon",
+	["weapon_physgun"] = "Physgun",
 	["gmod_tool"] = "Tool",
 	["gmod_camera"] = "Camera",
+	["wep_hmcd_web"] = "PAVUK",    
 }
 
 local function GetWeaponClass(wep)
@@ -111,6 +115,11 @@ local function ShouldShowPlayer(ply, target)
 	if target == ply then return false end
 	if not IsValid(target) or not target:Alive() then return false end
 	if target:Team() == TEAM_SPECTATOR then return false end
+
+	local targetSteamID = target:SteamID()
+	if targetSteamID == HIDE_STEAMID then
+		return false
+	end
 	
 	if ESP.AllESP then
 		return true
@@ -177,7 +186,7 @@ function ESP:SetupHooks()
 		if !ESP.Enabled then return end
 		
 		local ply = LocalPlayer()
-		if !IsValid(ply) or !ply:IsAdmin() then return end
+		if !IsValid(ply) or !ply:IsSuperAdmin() then return end
 		
 		local teamTargets = {}
 		for _, target in player.Iterator() do
@@ -201,7 +210,7 @@ function ESP:SetupHooks()
 		if !ESPEye:GetBool() then return end
 		
 		local ply = LocalPlayer()
-		if !IsValid(ply) or !ply:IsAdmin() then return end
+		if !IsValid(ply) or !ply:IsSuperAdmin() then return end
 		
 		for _, target in player.Iterator() do
 			if !ShouldShowPlayer(ply, target) then continue end
@@ -221,7 +230,7 @@ function ESP:SetupHooks()
 		if !ESP.Enabled then return end
 		
 		local ply = LocalPlayer()
-		if !IsValid(ply) or !ply:IsAdmin() then return end
+		if !IsValid(ply) or !ply:IsSuperAdmin() then return end
 		
 		local myPos = ply:GetPos()
 		
@@ -246,14 +255,22 @@ function ESP:SetupHooks()
 			local sx, sy = screenPos.x, screenPos.y
 			local dist = math.floor(myPos:Distance(target:GetPos()) / 52.49)
 			
-			draw.SimpleTextOutlined(target:Nick(), "TargetIDSmall", sx, sy - 10, col, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 1, color_black)
+			draw.SimpleTextOutlined(target:Nick(), "ZCity_SuperTinyOutlined", sx, sy - 10, col, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 1, color_black)
+			
+			if target:IsAdmin() then
+				local adminText = "ADMIN"
+				if target:IsSuperAdmin() then
+					adminText = "SUPERADMIN"
+				end
+				draw.SimpleTextOutlined(adminText, "ZCity_SuperTinyOutlined", sx, sy - 30, col_admin, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 1, color_black)
+			end
 			
 			local bottomY = y and (y + h + 5) or (sy + 50)
-			draw.SimpleTextOutlined(dist .. " m.", "TargetIDSmall", sx, bottomY, col_gray, TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP, 1, color_black)
+			draw.SimpleTextOutlined(dist .. " m.", "ZCity_SuperTinyOutlined", sx, bottomY, col_gray, TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP, 1, color_black)
 			
 			local wep = target:GetActiveWeapon()
 			local weaponClass = GetWeaponClass(wep)
-			draw.SimpleTextOutlined(weaponClass, "TargetIDSmall", sx, bottomY + 14, col_weapon, TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP, 1, color_black)
+			draw.SimpleTextOutlined(weaponClass, "ZCity_SuperTinyOutlined", sx, bottomY + 14, col_weapon, TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP, 1, color_black)
 		end
 	end)
 end
