@@ -22,6 +22,7 @@ local gordon_hide = {
 }
 
 hook.Add("HUDShouldDraw", "homigrad", function(name)
+	if not lply then return end
 	if hide[name] or lply.PlayerClassName and lply.PlayerClassName == "Gordon" and gordon_hide[name] then
 		return false
 	end
@@ -567,10 +568,6 @@ local randomGestures = {
 	{"fuck you", function() RunConsoleCommand("hg_hand_gesture", "fuckyou") end},
 	{"thumb_up", function() RunConsoleCommand("hg_hand_gesture" , "thumb_up") end},
 }
-
-concommand.Add("hg_randomgesture",function()
-	randomGesture()
-end)
 
 hook.Add("radialOptions", "7", function()
     local ply = LocalPlayer()
